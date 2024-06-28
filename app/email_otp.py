@@ -1,6 +1,9 @@
 from email.message import EmailMessage
 import ssl
 import smtplib
+import os
+from dotenv import load_dotenv
+
 
 def send_otp(to, otp):
     try:
@@ -14,15 +17,16 @@ def send_otp(to, otp):
         # SSL Certificate
         context = ssl.create_default_context()
 
+        # Email Credentials
+        load_dotenv()
+        email_id = "aadityajain010203@gmail.com"
+        email_password = os.getenv("email_password")
+
         with smtplib.SMTP_SSL("smtp.gmail.com", port=465, context=context) as smtp:
-            smtp.login("aadityajain010203@gmail.com", "your password here")
+            smtp.login(email_id, email_password)
             smtp.send_message(emailObj)
 
         return True
 
     except:
         return False
-    
-
-if __name__ == "__main__":
-    print(send_otp("aadityajain0128@gmail.com", 3412))
