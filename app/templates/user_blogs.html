@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}{{ author.fname | capitalize }}'s Profile{% endblock title %}
+{% block body %}
+    <br><br><br><br>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-12 mb-4">
+                <div class="card" style="text-align: right;">
+                    <div class="card-header"></div>
+                    <img src="{{ url_for('static', filename=author.profile) }}" class="card-img-top" alt="Profile Image" style="object-fit: cover; width: 150px; height: 150px; margin: 3vh auto 3vh auto; border-radius: 50%;">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ author.fname }} {{ author.lname }}</h3>
+                        <span class="text-body">About Author</span><br>
+                        {% if author.bio == "" %}
+                            <span class="text-muted">{{ author.fname }} does not have any Bio</span>
+                        {% else %}
+                            <p class="card-text">{{ author.bio }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer"></div>
+                </div>
+            </div>
+            <div class="col-lg-1 d-none d-lg-block"></div>
+            <div class="col-lg-8 col-md-12">
+                {% for post in posts %}
+                    <div class="card mb-4 text-center" style="margin: 1vh auto 1vh auto;">
+                        <div class="card-header">
+                            {% for tag in post.tags.all() %}
+                                <a href="/tag/{{ tag.name }}"><span class="badge bg-primary">{{ tag.name }}</span></a>
+                            {% endfor %}
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-title blog-title"><a href="/blog/{{ post.slug }}">{{ post.title }}</a></h3>
+                            <p class="card-text">{{ post.sample_content }}...</p>
+                            <a href="/blog/{{ post.slug }}" class="btn btn-dark" style="margin-left: 30%;">Read More...</a>
+                        </div>
+                        <div class="card-footer text-muted text-center">
+                            <span class="blog_info">Created on: {{ post.created.strftime("%d %b, %Y") }}</span><br>
+                            <span class="blog_info">Author: @<a href="/user/@{{ author.username }}" style="color: yellow;">{{ author.username }}</a></span>
+                            <span class="blog_info">Views: 
+                                {% if post.views > 1000 %}
+                                    {{ (post.views / 1000) | round }} k
+                                {% else %}
+                                    {{ post.views }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

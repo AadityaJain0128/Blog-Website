@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block title %}Add Blog{% endblock title %}
+{% block body %}
+    {% import "bootstrap/wtf.html" as wtf %}
+    <div>
+    <br><h3 class="text-center">Add Blog</h3><br><br>
+    <form method="POST" id="blog-form">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-end">
+                    {{ form.submit(class_="btn btn-primary mb-3") }}
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-12 mb-3">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.title.label(class_="form-label") }}
+                        {{ form.title(class_="form-control") }}
+                    </div>
+                    <br>
+                    <div class="mb-3">
+                        {{ form.sample.label(class_="form-label") }}
+                        {{ form.sample(class_="form-control", placeholder="Enter the overview of the content here !") }}
+                    </div>
+                    <br>
+                    <div class="mb-3">
+                        <label for="tag-search" class="form-label">Add Tags</label>
+                        <input type="text" class="form-control" id="tag-search" autocomplete="off">
+                        <div id="tag-results" class="dropdown-menu"></div>
+                    </div>
+                    <div id="selected-tags-container" class="mb-3" style="display: none;">
+                        <label for="selected-tags">Selected Tags:</label>
+                        <div id="selected-tags-list" class="d-flex flex-wrap"></div>
+                        {{ form.tags(id="selected-tags", style="display: none;") }}
+                    </div>
+                </div>
+                <div class="col-lg-8 col-12 mb-3">
+                    <div class="mb-3">
+                        {{ form.content.label(class_="form-label") }}
+                        {{ form.content(class_="form-control bg-dark", id="content", oninput="validate_content();") }}
+                    </div>
+                    <div id="count" style="color: red;"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+    {{ ckeditor.load() }}
+    {{ ckeditor.config(name="content", height=300) }}
+
+    <style>
+        .tag-item {
+            background-color: #007bff;
+            color: white;
+            padding: 0.5em 0.75em;
+            border-radius: 0.25em;
+            margin: 0.25em;
+        }
+        .remove-tag {
+            margin-left: 0.5em;
+            cursor: pointer;
+        }
+        #tag-results {
+            position: absolute;
+            z-index: 1000;
+        }
+        .dropdown-item:hover {
+            background-color: grey;
+        }
+    </style>
+
+    <script>
+        CKEDITOR.on('instanceReady', function(evt) {
+            var editor = evt.editor;
+            var editable = editor.editable();
+            editable.setStyle('background-color', '#212529');
+            editable.setStyle('color', '#ffffff');
+            editable.setStyle('border-color', '#333333');
+        });
+
+        function validate_content(){
+            const content = document.getElementById("content").getBody().getText();
+            document.getElementById("count").innerHTML = content.length;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            function updateHiddenTagsField() {
+                const selectedTags = Array.from(document.querySelectorAll("#selected-tags-list .tag-item")).map(tagItem => tagItem.dataset.tagId);
+                document.getElementById("selected-tags").value = selectedTags.join(",");
+                console.log("Updated selected tags:", selectedTags.join(","));  // Debugging statement
+            }
+
+            function updateSelectedTagsContainerVisibility() {
+                const selectedTagsContainer = document.getElementById("selected-tags-container");
+                const selectedTags = document.getElementById("selected-tags").value.split(",").filter(Boolean);
+                if (selectedTags.length > 0) {
+                    selectedTagsContainer.style.display = 'block';
+                } else {
+                    selectedTagsContainer.style.display = 'none';
+                }
+            }
+
+            document.getElementById("tag-search").addEventListener("input", function() {
+                const query = this.value;
+                if (query.length > 0) {
+                    fetch(`{{ url_for('views.fetch_tags') }}?query=${query}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const tagResults = document.getElementById("tag-results");
+                            tagResults.innerHTML = '';
+                            data.tags.forEach(tag => {
+                                const item = document.createElement('div');
+                                item.classList.add('dropdown-item');
+                                item.dataset.tagId = tag.id;
+                                item.dataset.tagName = tag.name;
+                                item.textContent = tag.name;
+                                tagResults.appendChild(item);
+                            });
+                            tagResults.style.display = 'block';
+                        });
+                } else {
+                    document.getElementById("tag-results").style.display = 'none';
+                }
+            });
+
+            document.addEventListener("click", function(event) {
+                if (event.target.classList.contains('dropdown-item')) {
+                    const tagId = event.target.dataset.tagId;
+                    const tagName = event.target.dataset.tagName;
+                    let selectedTags = document.getElementById("selected-tags").value.split(",").filter(Boolean);
+
+                    if (selectedTags.length >= 5) {
+                        alert("You can select up to 5 tags only.");
+                        return;
+                    }
+
+                    if (!selectedTags.includes(String(tagId))) {
+                        selectedTags.push(tagId);
+                        document.getElementById("selected-tags").value = selectedTags.join(",");
+                        const tagItem = document.createElement('div');
+                        tagItem.classList.add('tag-item', 'badge', 'badge-primary', 'm-1');
+                        tagItem.dataset.tagId = tagId;
+                        tagItem.innerHTML = `${tagName} <span class="remove-tag" style="cursor: pointer;">&times;</span>`;
+                        document.getElementById("selected-tags-list").appendChild(tagItem);
+                    }
+
+                    document.getElementById("tag-results").style.display = 'none';
+                    document.getElementById("tag-search").value = '';
+                    updateHiddenTagsField();
+                    updateSelectedTagsContainerVisibility();
+                }
+
+                if (event.target.classList.contains('remove-tag')) {
+                    const tagItem = event.target.closest(".tag-item");
+                    const tagId = tagItem.dataset.tagId;
+                    let selectedTags = document.getElementById("selected-tags").value.split(",").filter(Boolean);
+                    selectedTags = selectedTags.filter(id => id != tagId);
+                    document.getElementById("selected-tags").value = selectedTags.join(",");
+                    tagItem.remove();
+                    updateHiddenTagsField();
+                    updateSelectedTagsContainerVisibility();
+                }
+            });
+
+            // Ensure tags field is updated before form submission
+            document.getElementById("blog-form").addEventListener("submit", function() {
+                updateHiddenTagsField();
+                const selectedTags = document.getElementById("selected-tags").value;
+                console.log("Form submission, selected tags:", selectedTags);  // Debugging statement
+            });
+
+            // Initial update for hidden tags field and container visibility
+            updateHiddenTagsField();
+            updateSelectedTagsContainerVisibility();
+        });
+    </script>
+{% endblock body %}

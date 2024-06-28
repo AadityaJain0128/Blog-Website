@@ -1,0 +1,11 @@
+#show_hide {
+    cursor: pointer;
+}
+
+.blog_info {
+    margin-left: 1vh;
+}
+
+.blog-title a{
+    color: white;
+}

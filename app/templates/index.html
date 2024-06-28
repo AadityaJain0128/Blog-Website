@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock title %}
+{% block body %}
+    <br><br>
+    <h1 align="center">Top Blog Posts</h1>
+    <div id="main">
+        {% for post in pages.items %}
+            <div class="card text-center" style="margin: 5vh 10% 5vh 10%;">
+                <div class="card-header">
+                    {% for tag in post.tags.all() %}
+                        <a href="/tag/{{ tag.name }}"><span class="badge bg-primary">{{ tag.name }}</span></a>
+                    {% endfor %}
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title blog-title"><a href="/blog/{{ post.slug }}">{{ post.title }}</a></h3>
+                    <p class="card-text">{{ post.sample_content }}</p>
+                    <a href="/blog/{{ post.slug }}" class="btn btn-dark" style="margin-left: 30%;">Read More...</a>
+                </div>
+                <div class="card-footer text-muted">
+                    <span class="blog_info">Created on: {{ post.created.strftime("%d %b, %Y") }}</span><br>
+                    <span class="blog_info">Author: 
+                        @<a href="/user/@{{ User.query.filter_by(username = post.author_id).first().username }}" style="color: yellow;">{{ User.query.filter_by(username = post.author_id).first().username }}</a>
+                    </span>
+                    <span class="blog_info">Views: 
+                        {% if post.views > 1000 %}
+                            {{ (post.views / 1000) | round }} k
+                        {% else %}
+                            {{ post.views }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+        <li class="page-item {% if not pages.has_prev %} disabled {% endif %}">
+            <a class="page-link" href="{{ url_for('views.home', page=pages.prev_num) }}">Previous</a>
+        </li>
+        {% for page in pages.iter_pages() %}
+            {% if page %}
+                <li class="page-item {% if page == pages.page %} active {% endif %}"><a class="page-link" href="{{ url_for('views.home', page=page, query=query) }}">{{ page }}</a></li>
+            {% else %}
+                <li class="page-item"><a class="page-link">...</a></li>
+            {% endif %}
+        {% endfor %}            
+        <li class="page-item {% if not pages.has_next %} disabled {% endif %}">
+            <a class="page-link" href="{{ url_for('views.home', page=pages.next_num, query=query) }}">Next</a>
+        </li>
+        </ul>
+    </nav>
+{% endblock body %}
+
+        
+
+    
+    

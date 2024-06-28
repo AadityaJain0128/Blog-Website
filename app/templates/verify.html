@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Verify E-Mail{% endblock title %}
+{% block body %}
+    <br><h3 align="center">Sign Up</h3><br>
+    <div class="d-flex justify-content-center">
+        <form method="POST">
+            <label for="emailID" class="form-label">E-Mail ID</label>
+            <input type="email" id="emailID" name="emailID" class="form-control" value="{{ emailID }}" readonly>
+            <br>
+            <label for="otp" class="form-label">OTP</label>
+            <input type="number" id="otp" name="otp" class="form-control">
+            <br>
+            <button type="submit" class="btn btn-outline-light">Verify</button>
+        </form>
+    </div>
+{% endblock body %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Sign-Up{% endblock title %}
+{% block body %}
+    <br><h3 align="center">Sign Up</h3><br>
+    <div class="d-flex justify-content-center">
+        <form method="POST">
+            <label for="username" class="form-label">UserName</label>
+            <input type="text" id="username" name="username" class="form-control" value="{{ username }}">
+            <label for="firstName" class="form-label">First Name</label>
+            <input type="text" id="firstName" name="firstName" class="form-control" value="{{ firstName }}">
+            <label for="lastName" class="form-label">Last Name</label>
+            <input type="text" id="lastName" name="lastName" class="form-control" value="{{ lastName }}">
+            <label for="emailID" class="form-label">E-Mail ID</label>
+            <input type="email" id="emailID" name="emailID" class="form-control" value="{{ emailID }}">
+            <label for="password1" class="form-label">Password</label>
+            <input type="password" id="password1" name="password1" class="form-control" value="{{ password1 }}">
+            <label for="password2" class="form-label">Confirm Password</label>
+            <input type="password" id="password2" name="password2" class="form-control" value="{{ password2 }}">
+            <br>
+            <button type="submit" class="btn btn-outline-light">Sign Up</button>
+        </form>
+    </div>
+{% endblock body %}
