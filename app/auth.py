@@ -90,10 +90,8 @@ def verify():
     else:
         if not session.get("otp", None):
             otp = randint(1000, 9999)
-            print(otp)
             session["otp"] = otp
-            # if send_otp(email, otp):
-            if True:
+            if send_otp(email, otp):
                 flash("Please enter the OTP recieved on your E-Mail ID to proceed !", category="warning")
             else:
                 flash("Some Error in creating your Account. Please try again later !", category="error")
